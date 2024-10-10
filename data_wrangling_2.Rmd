@@ -5,7 +5,131 @@ date: "2024-10-10"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-
+```{r}
+library(tidyverse)
+library(rvest)
+library(httr)
 
 ```
+```{r}
+url = "http://samhda.s3-us-gov-west-1.amazonaws.com/s3fs-public/field-uploads/2k15StateFiles/NSDUHsaeShortTermCHG2015.htm"
+drug_use_html = read_html(url)
+
+drug_use_html
+```
+Rather than trying to grab something using a CSS selector, let’s try our luck extracting the tables from the HTML.
+
+```{r}
+drug_use_html |>
+  html_table()
+```
+This has extracted all of the tables on the original page; that’s why we have a list with 15 elements. (We haven’t really talked about lists yet, but for now you can think of them as a general collection of objects in R. 
+
+the “note” at the bottom of the table appears in every column in the first row. We need to remove that…
+```{r}
+table_marj = 
+  drug_use_html |> 
+  html_table() |> 
+  first() |>
+  slice(-1) 
+
+table_marj
+```
+
+Learning assessment: Create a data frame that contains the cost of living table for New York from this page
+```{r}
+nyc_cost = 
+  read_html("https://www.bestplaces.net/cost_of_living/city/new_york/new_york") |>
+  html_table(header = TRUE) |>
+  first()
+
+# my codes
+url = "https://www.bestplaces.net/cost_of_living/city/new_york/new_york"
+living_cost_html = read_html(url)
+
+
+table_living_cost = 
+  living_cost_html |>
+  html_table()
+
+table_living_cost_df <- as.data.frame(table_living_cost[[1]])
+
+colnames(table_living_cost_df) <- c("Categories", "New York", "New York", "United States")
+
+print(table_living_cost_df)
+```
+
+## CSS Selectors
+
+Suppose we’d like to scrape the data about the Star Wars Movies from the IMDB page. The first step is the same as before – we need to get the HTML.
+```{r}
+swm_html = 
+  read_html("https://www.imdb.com/list/ls070150896/")
+```
+
+For each element, use the CSS selector in html_elements() to extract the relevant HTML code, and convert it to text. Then combine these into a data frame.
+```{r}
+title_vec = 
+  swm_html |>
+  html_elements(".ipc-title-link-wrapper .ipc-title__text") |>
+  html_text()
+
+metascore_vec = 
+  swm_html |>
+  html_elements(".metacritic-score-box") |>
+  html_text()
+
+runtime_vec = 
+  swm_html |>
+  html_elements(".dli-title-metadata-item:nth-child(2)") |>
+  html_text()
+
+swm_df = 
+  tibble(
+    title = title_vec,
+    score = metascore_vec,
+    runtime = runtime_vec)
+```
+
+This page contains some (made up) books. Use a process similar to the one above to extract the book titles, stars, and price
+```{r}
+books_html = read_html("https://books.toscrape.com/")
+
+books_titles = 
+  books_html |>
+  html_elements("h3") |>
+  html_text2()
+
+books_stars = 
+  books_html |>
+  html_elements(".star-rating") |>
+  html_attr("class")
+
+books_price = 
+  books_html |>
+  html_elements(".price_color") |>
+  html_text()
+
+books = tibble(
+  title = books_titles,
+  stars = books_stars,
+  price = books_price
+)
+```
+
+## Using an API
+
+Get water data
+
+```{r}
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.csv") |> 
+  content("parsed")
+```
+
+Data.gov also has a lot of data available using their API; often this is available as CSV or JSON as well. For example, we might be interested in data coming from BRFSS. This is importable via the API as a CSV 
+
+```{r}
+
+```
+
