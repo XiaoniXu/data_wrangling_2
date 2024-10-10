@@ -130,6 +130,15 @@ nyc_water =
 Data.gov also has a lot of data available using their API; often this is available as CSV or JSON as well. For example, we might be interested in data coming from BRFSS. This is importable via the API as a CSV 
 
 ```{r}
+brfss_smart2010 = 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv",
+      query = list("$limit" = 5000)) |> 
+  content("parsed")
+```
+
+Pokemon API
+
+```{r}
 
 ```
 
