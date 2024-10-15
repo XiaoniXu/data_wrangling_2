@@ -1,0 +1,116 @@
+---
+title: "strings_and_factors"
+author: "Xiaoni Xu"
+date: "2024-10-15"
+output: html_document
+---
+
+Load the necessary libraries
+
+```{r setup, message = FALSE}
+library(rvest)
+library(tidyverse)
+library(p8105.datasets)
+```
+
+## Strings and regex
+
+```{r}
+string_vec = c("my", "name", "is", "Agatha")
+
+str_detect(string_vec, "Agatha")
+
+str_replace(string_vec, "Agatha", "agatha")
+```
+For exact matches, you can designate matches at the beginning or end of a line.
+```{r}
+string_vec = c(
+  "i think we all rule for participating",
+  "i think i have been caught",
+  "i think this will be quite fun actually",
+  "it will be fun, i think"
+  )
+
+# detect sentences that start with "i think"
+str_detect(string_vec, "^i think")
+
+# end with "i think"
+str_detect(string_vec, "i think$")
+```
+You can designate a list of characters that will count as a match.
+```{r}
+string_vec = c(
+  "Time for a Pumpkin Spice Latte!",
+  "went to the #pumpkinpatch last weekend",
+  "Pumpkin Pie is obviously the best pie",
+  "SMASHING PUMPKINS -- LIVE IN CONCERT!!"
+  )
+
+str_detect(string_vec,"pumpkin")
+
+str_detect(string_vec,"Pumpkin")
+
+str_detect(string_vec,"PUMPKIN")
+
+str_detect(string_vec,"[Pp]umpkin")
+```
+
+You don’t have to list these; instead, you can provide a range of letters or numbers that count as a match.
+```{r}
+string_vec = c(
+  '7th inning stretch',
+  '1st half soon to begin. Texas won the toss.',
+  'she is 5 feet 4 inches tall',
+  '3AM - cant sleep :('
+  )
+
+# pattern: number followed by 2 letters
+str_detect(string_vec, "^[0-9][a-zA-Z]")
+```
+
+The character `.` matches anything.
+```{r}
+string_vec = c(
+  'Its 7:11 in the evening',
+  'want to go to 7-11?',
+  'my flight is AA711',
+  'NetBios: scanning ip 203.167.114.66'
+  )
+
+str_detect(string_vec, "7.11")
+```
+
+Some characters are “special”. These include `[` and `]`, `(` and `)`, and `..` If you want to search for these, you have to indicate they’re special using `\`. Unfortunately, `\` is also special, so things get weird.
+```{r}
+string_vec = c(
+  'The CI is [2, 5]',
+  ':-]',
+  ':-[',
+  'I found the answer on pages [6-7]'
+  )
+
+str_detect(string_vec, "\\[")
+```
+
+## Thoughts on factors
+
+Factors are the way to store categorical variables in R. They can take on specific levels (e.g. male and female) which are usually presented as characters but are, in fact, stored by R as integers. These integer values are used by functions throughout R – in making plots, in organizing tables, in determining the “reference” category – but most of the time are hidden by easier-to-read character string labels. This close relationship to strings, when in fact there is a lot of added structure, is why factors can be so confusing.
+
+This is the kind of thing that can get you in trouble.
+
+```{r}
+vec_sex = factor(c("male", "male", "female", "female"))
+vec_sex
+
+as.numeric(vec_sex)
+
+vec_sex = fct_relevel(vec_sex, "male")
+vec_sex
+
+as.numeric(vec_sex)
+```
+
+```{r}
+
+```
+
